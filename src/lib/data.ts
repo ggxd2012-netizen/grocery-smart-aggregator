@@ -28,20 +28,31 @@ async function fetchCatalogFromSupabase(): Promise<Catalog> {
     supabase.from("product_prices").select("*"),
     supabase.from("coupons").select("*"),
   ]);
+
   const err = s.error || p.error || pr.error || c.error;
   if (err) throw err;
-  return { stores: s.data ?? [], products: p.data ?? [], prices: pr.data ?? [], coupons: c.data ?? [] };
+
+  return {
+    stores: (s.data ?? []) as Store[],
+    products: (p.data ?? []) as Product[],
+    prices: (pr.data ?? []) as Price[],
+    coupons: (c.data ?? []) as Coupon[],
+  };
 }
 
 export const catalogQuery = queryOptions({
   queryKey: ["catalog"],
   staleTime: 5 * 60_000,
   queryFn: async (): Promise<Catalog> => {
-    if (!hasSupabaseConfig()) return createSampleCatalog();
+    if (!hasSupabaseConfig()) {
+      return createSampleCatalog();
+    }
 
     try {
       const catalog = await fetchCatalogFromSupabase();
-      if (catalog.products.length || catalog.stores.length || catalog.prices.length) return catalog;
+      if (catalog.products.length || catalog.stores.length || catalog.prices.length) {
+        return catalog;
+      }
     } catch (error) {
       console.warn("Falling back to sample catalog because Supabase is unavailable or empty:", error);
     }
@@ -54,7 +65,9 @@ export const historyQuery = (productId: string) =>
   queryOptions({
     queryKey: ["history", productId],
     queryFn: async () => {
-      if (!hasSupabaseConfig()) return createSampleHistory(productId);
+      if (!hasSupabaseConfig()) {
+        return createSampleHistory(productId);
+      }
 
       try {
         const { data, error } = await supabase
@@ -62,8 +75,9 @@ export const historyQuery = (productId: string) =>
           .select("store_id, day, price")
           .eq("product_id", productId)
           .order("day");
+
         if (error) throw error;
-        return data ?? createSampleHistory(productId);
+        return data?.length ? data : createSampleHistory(productId);
       } catch (error) {
         console.warn("Price history unavailable, using demo values:", error);
         return createSampleHistory(productId);
@@ -73,7 +87,13 @@ export const historyQuery = (productId: string) =>
 
 export const CATEGORIES = ["dairy", "produce", "meat", "pantry", "beverages", "bakery", "household"] as const;
 export const CAT_EMOJI: Record<string, string> = {
-  dairy: "🥛", produce: "🥬", meat: "🥩", pantry: "🫙", beverages: "🧃", bakery: "🥐", household: "🧽",
+  dairy: "🥛",
+  produce: "🥬",
+  meat: "🥩",
+  pantry: "🫙",
+  beverages: "🧃",
+  bakery: "🥐",
+  household: "🧽",
 };
 export const TAGS = ["organic", "gluten_free", "keto", "lactose_free", "halal", "sugar_free"] as const;
 
