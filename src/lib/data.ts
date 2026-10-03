@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { createSampleCatalog, createSampleHistory } from "./sample-data";
 
 export type Store = Tables<"stores">;
 export type Product = Tables<"products">;
@@ -14,19 +15,38 @@ export type Catalog = {
   coupons: Coupon[];
 };
 
+const hasSupabaseConfig = () => {
+  const url = typeof import.meta !== "undefined" ? import.meta.env?.VITE_SUPABASE_URL : undefined;
+  const key = typeof import.meta !== "undefined" ? import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY : undefined;
+  return Boolean((url && key) || (typeof process !== "undefined" && process.env?.SUPABASE_URL && process.env?.SUPABASE_PUBLISHABLE_KEY));
+};
+
+async function fetchCatalogFromSupabase(): Promise<Catalog> {
+  const [s, p, pr, c] = await Promise.all([
+    supabase.from("stores").select("*"),
+    supabase.from("products").select("*").order("name_en"),
+    supabase.from("product_prices").select("*"),
+    supabase.from("coupons").select("*"),
+  ]);
+  const err = s.error || p.error || pr.error || c.error;
+  if (err) throw err;
+  return { stores: s.data ?? [], products: p.data ?? [], prices: pr.data ?? [], coupons: c.data ?? [] };
+}
+
 export const catalogQuery = queryOptions({
   queryKey: ["catalog"],
   staleTime: 5 * 60_000,
   queryFn: async (): Promise<Catalog> => {
-    const [s, p, pr, c] = await Promise.all([
-      supabase.from("stores").select("*"),
-      supabase.from("products").select("*").order("name_en"),
-      supabase.from("product_prices").select("*"),
-      supabase.from("coupons").select("*"),
-    ]);
-    const err = s.error || p.error || pr.error || c.error;
-    if (err) throw err;
-    return { stores: s.data!, products: p.data!, prices: pr.data!, coupons: c.data! };
+    if (!hasSupabaseConfig()) return createSampleCatalog();
+
+    try {
+      const catalog = await fetchCatalogFromSupabase();
+      if (catalog.products.length || catalog.stores.length || catalog.prices.length) return catalog;
+    } catch (error) {
+      console.warn("Falling back to sample catalog because Supabase is unavailable or empty:", error);
+    }
+
+    return createSampleCatalog();
   },
 });
 
@@ -34,13 +54,20 @@ export const historyQuery = (productId: string) =>
   queryOptions({
     queryKey: ["history", productId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("price_history")
-        .select("store_id, day, price")
-        .eq("product_id", productId)
-        .order("day");
-      if (error) throw error;
-      return data;
+      if (!hasSupabaseConfig()) return createSampleHistory(productId);
+
+      try {
+        const { data, error } = await supabase
+          .from("price_history")
+          .select("store_id, day, price")
+          .eq("product_id", productId)
+          .order("day");
+        if (error) throw error;
+        return data ?? createSampleHistory(productId);
+      } catch (error) {
+        console.warn("Price history unavailable, using demo values:", error);
+        return createSampleHistory(productId);
+      }
     },
   });
 
