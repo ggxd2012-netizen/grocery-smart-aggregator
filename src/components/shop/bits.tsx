@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { catalogQuery, fmt, lowestFor, pricesFor, type Product, type Store } from "@/lib/data";
@@ -30,6 +30,11 @@ export function StockBadge({ stock }: { stock: number }) {
   return <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success">{t("inStock")}</span>;
 }
 
+function getProductImage(product: Product) {
+  const record = product as Product & { image?: string; image_url?: string; imageUrl?: string; photo?: string; thumbnail?: string };
+  return record.image || record.image_url || record.imageUrl || record.photo || record.thumbnail || null;
+}
+
 export function ProductCard({ product, layout = "grid" }: { product: Product; layout?: "grid" | "list" }) {
   const { t, lang } = useI18n();
   const { addItem } = useApp();
@@ -37,6 +42,8 @@ export function ProductCard({ product, layout = "grid" }: { product: Product; la
   const low = cat ? lowestFor(cat, product.id) : null;
   const count = cat ? pricesFor(cat, product.id).filter((p) => p.stock > 0).length : 0;
   const name = lang === "ar" ? product.name_ar : product.name_en;
+  const image = getProductImage(product);
+  const lowestPrice = low ? Number(low.promo_price ?? low.price) : null;
 
   const add = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -49,30 +56,59 @@ export function ProductCard({ product, layout = "grid" }: { product: Product; la
       to="/product/$id"
       params={{ id: product.id }}
       className={cn(
-        "group relative rounded-2xl bg-card p-3 shadow-card ring-1 ring-border transition hover:-translate-y-0.5",
+        "group relative overflow-hidden rounded-2xl bg-card p-3 shadow-card ring-1 ring-border transition hover:-translate-y-0.5",
         layout === "list" && "flex items-center gap-3",
       )}
     >
-      <div className={cn("grid place-items-center rounded-xl bg-muted text-5xl", layout === "grid" ? "aspect-square" : "h-16 w-16 shrink-0 text-3xl")}>
-        {product.emoji}
+      <div
+        className={cn(
+          "relative grid place-items-center overflow-hidden rounded-xl bg-muted/80",
+          layout === "grid" ? "aspect-square" : "h-16 w-16 shrink-0",
+        )}
+      >
+        {image ? (
+          <img
+            src={image}
+            alt={name}
+            className={cn("h-full w-full object-cover transition duration-200 group-hover:scale-[1.03]", layout === "grid" ? "" : "object-contain")}
+            onError={(e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              target.style.display = "none";
+              target.parentElement?.appendChild(Object.assign(document.createElement("span"), {
+                textContent: product.emoji || "🛒",
+                classNameName: "text-4xl",
+              }));
+            }}
+          />
+        ) : (
+          <span className="text-4xl">{product.emoji || "🛒"}</span>
+        )}
       </div>
+
       <div className={cn("min-w-0", layout === "grid" && "mt-2")}>
         <p className="line-clamp-2 text-sm font-medium leading-snug">{name}</p>
         <p className="mt-1 text-xs text-muted-foreground">
+          {product.size ? `${product.size} · ` : ""}
           {count} {t("stores")}
         </p>
-        {low && (
-          <p className="mt-1 tabular">
+
+        {lowestPrice !== null && (
+          <p className="mt-2 tabular">
             <span className="text-xs text-muted-foreground">{t("from")} </span>
-            <span className="font-display text-lg font-bold text-primary">{fmt(Number(low.promo_price ?? low.price))}</span>
+            <span className="font-display text-lg font-bold text-primary">{fmt(lowestPrice)}</span>
             <span className="text-xs text-muted-foreground"> SAR</span>
           </p>
         )}
       </div>
+
       <button
+        type="button"
         onClick={add}
         aria-label={t("add")}
-        className={cn("grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground shadow-card transition hover:scale-105", layout === "grid" ? "absolute end-3 top-3" : "ms-auto shrink-0")}
+        className={cn(
+          "grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground shadow-card transition hover:scale-105",
+          layout === "grid" ? "absolute end-3 top-3" : "ms-auto",
+        )}
       >
         <Plus className="h-5 w-5" />
       </button>
