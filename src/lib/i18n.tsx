@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 export type Lang = "en" | "ar";
 
 const dict = {
-  appName: { en: "Salla Smart", ar: "سلة ذكية" },
+  appName: { en: "Smart Basket", ar: "السلة الذكية" },
   tagline: { en: "Compare every grocery app. Pay the least.", ar: "قارن كل تطبيقات البقالة. وادفع الأقل." },
   search: { en: "Search milk, rice, eggs…", ar: "ابحث عن حليب، أرز، بيض…" },
   home: { en: "Home", ar: "الرئيسية" },
@@ -116,6 +116,32 @@ const dict = {
   tag_lactose_free: { en: "Lactose-free", ar: "خالٍ من اللاكتوز" },
   tag_halal: { en: "Halal", ar: "حلال" },
   tag_sugar_free: { en: "Sugar-free", ar: "خالٍ من السكر" },
+  or: { en: "or", ar: "أو" },
+  saveAmount: { en: "Save {n} SAR", ar: "توفير {n} ر.س" },
+  cheapestStore: { en: "Cheapest store", ar: "المتجر الأوفر" },
+  maxSavings: { en: "Maximum savings", ar: "التوفير الأقصى" },
+  singleStore: { en: "Buy all from one store", ar: "اشتر الكل من متجر واحد" },
+  splitStores: { en: "Split across two stores", ar: "قسّم على متجرين" },
+  optimizeBasket: { en: "Optimize basket", ar: "تحسين السلة الذكي" },
+  compareTitle: { en: "Price comparison", ar: "مقارنة الأسعار" },
+  compareHint: { en: "Compare this product across all stores", ar: "قارن هذا المنتج في كل المتاجر" },
+  importList: { en: "Import text list", ar: "استيراد قائمة نصية" },
+  importHint: { en: "Paste your grocery list and we'll find the cheapest products", ar: "الصق قائمة مقاضيك وسنجد لك أرخص المنتجات" },
+  importPlaceholder: { en: "e.g. milk, eggs, rice, banana", ar: "مثال: حليب، بيض، أرز، موز" },
+  importBtn: { en: "Find & add to basket", ar: "ابحث وأضف للسلة" },
+  imported: { en: "Added {n} items to basket", ar: "تمت إضافة {n} منتجات للسلة" },
+  importedNone: { en: "No matching products found", ar: "لم نجد منتجات مطابقة" },
+  copyCode: { en: "Copy code", ar: "نسخ الكود" },
+  copied: { en: "Copied to clipboard", ar: "تم نسخ الكود" },
+  storeLogo: { en: "Store logo", ar: "شعار المتجر" },
+  productImage: { en: "Product image", ar: "صورة المنتج" },
+  priceGap: { en: "Price gap", ar: "فرق السعر" },
+  deliveryTime: { en: "Delivery time", ar: "وقت التوصيل" },
+  bestPrice: { en: "Best price", ar: "أفضل سعر" },
+  closeBtn: { en: "Close", ar: "إغلاق" },
+  detectingLocation: { en: "Detecting your location…", ar: "نحدد موقعك…" },
+  locationError: { en: "Couldn't get your location. Please pick a district.", ar: "تعذّر تحديد موقعك. اختر حيًا." },
+  sar: { en: "SAR", ar: "ر.س" },
 } as const;
 
 export type DictKey = keyof typeof dict;
@@ -124,7 +150,7 @@ type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (k: DictKey, vars?: Reco
 const I18nContext = createContext<Ctx | null>(null);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("en");
+  const [lang, setLangState] = useState<Lang>("ar");
   useEffect(() => {
     const saved = localStorage.getItem("lang") as Lang | null;
     if (saved === "ar" || saved === "en") setLangState(saved);

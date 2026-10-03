@@ -2,11 +2,6 @@ import { supabase } from "@/integrations/supabase/client";
 import appConfig from "@/config/app.config";
 import { toast } from "sonner";
 
-/**
- * Enhanced Auth Service with Email Configuration
- * خدمة المصادقة المحسّنة مع إعدادات البريد الإلكتروني
- */
-
 export async function signUpWithEmail(email: string, password: string) {
   try {
     const { data, error } = await supabase.auth.signUp({
@@ -15,7 +10,6 @@ export async function signUpWithEmail(email: string, password: string) {
       options: {
         emailRedirectTo: window.location.origin,
         data: {
-          // Store user preferences
           locale: "ar",
           timezone: "Asia/Riyadh",
         },
@@ -27,17 +21,15 @@ export async function signUpWithEmail(email: string, password: string) {
       throw error;
     }
 
-    // If auto-confirm is enabled in config, we can bypass email verification
     if (appConfig.email.autoConfirmEmails) {
       toast.success("تم إنشاء حسابك بنجاح! يمكنك الآن تسجيل الدخول.", {
-        description: "لن تحتاج إلى تأكيد البريد في بيئة التطوير",
+        description: "لا تحتاج لتأكيد البريد — سجّل الدخول مباشرة",
       });
       return data;
     }
 
-    // Otherwise, notify user to check email
     toast.info("تحقق من بريدك الإلكتروني", {
-      description: "تم إرسال رابط التأكيد إليك. يرجى التحقق من صندوق البريد الرئيسي والبريد العشوائي.",
+      description: "تم إرسال رابط التأكيد إليك. تحقق من البريد الرئيسي والسخام.",
     });
 
     return data;
@@ -136,9 +128,6 @@ export async function resetPassword(email: string) {
   }
 }
 
-/**
- * Verify email confirmation (for custom email services)
- */
 export async function verifyEmailToken(token: string) {
   try {
     const { data, error } = await supabase.auth.verifyOtp({

@@ -1,30 +1,22 @@
-/**
- * CONFIGURATION FILE FOR SMART GROCERY AGGREGATOR
- * مرحبا في ملف الإعدادات الرئيسي
- */
-
 export const appConfig = {
-  // Application Identity
   app: {
-    name: "مقاضي الذكية", // Default name
+    name: "السلة الذكية",
     nameEn: "Smart Basket",
-    nameAr: "مقاضي الذكية",
+    nameAr: "السلة الذكية",
     tagline: "مقارنة أسعار البقالة بذكاء",
     taglineEn: "Smart Grocery Price Comparison",
     logo: "/logo.svg",
   },
 
-  // Email Configuration for Auth
   email: {
-    autoConfirmEmails: true, // Set to true for development/demo
-    provider: "supabase", // supabase, resend, sendgrid
+    autoConfirmEmails: true,
+    provider: "supabase",
     sendgridApiKey: process.env.SENDGRID_API_KEY || "",
     resendApiKey: process.env.RESEND_API_KEY || "",
     fromEmail: "noreply@smartbasket.local",
-    fromName: "مقاضي الذكية",
+    fromName: "السلة الذكية",
   },
 
-  // Geolocation
   geo: {
     enableReverseGeocoding: true,
     defaultLocation: {
@@ -33,28 +25,25 @@ export const appConfig = {
       nameAr: "الرياض - حي العليا",
       nameEn: "Riyadh - Al-Olaya",
     },
-    geoCodeProvider: "google", // google, nominatim, mapbox
+    geoCodeProvider: "nominatim",
     googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || "",
   },
 
-  // Stores Configuration
   stores: [
-    { id: "carrefour", nameAr: "كارفور", nameEn: "Carrefour" },
-    { id: "lulu", nameAr: "لولو هايبر ماركت", nameEn: "LuLu" },
-    { id: "panda", nameAr: "بنده", nameEn: "Panda" },
-    { id: "noon", nameAr: "نون", nameEn: "Noon" },
-    { id: "ninja", nameAr: "نينجا", nameEn: "Ninja" },
-    { id: "hungrystation", nameAr: "هنجري ستيشن", nameEn: "HungerStation" },
+    { id: "carrefour", nameAr: "كارفور", nameEn: "Carrefour", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Carrefour_logo.svg/120px-Carrefour_logo.svg.png" },
+    { id: "lulu", nameAr: "لولو", nameEn: "LuLu", logo: "https://upload.wikimedia.org/wikipedia/en/thumb/8/8e/Lulu_Hypermarket_logo.svg/120px-Lulu_Hypermarket_logo.svg.png" },
+    { id: "panda", nameAr: "بنده", nameEn: "Panda", logo: "https://upload.wikimedia.org/wikipedia/en/thumb/0/04/Panda_logo.svg/120px-Panda_logo.svg.png" },
+    { id: "noon", nameAr: "نون", nameEn: "Noon", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Noon_logo.svg/120px-Noon_logo.svg.png" },
+    { id: "ninja", nameAr: "نينجا", nameEn: "Ninja", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Ninja.svg/120px-Ninja.svg.png" },
+    { id: "hungrystation", nameAr: "هنجري ستيشن", nameEn: "HungerStation", logo: "https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/HungerStation_logo.svg/120px-HungerStation_logo.svg.png" },
   ],
 
-  // Currency
   currency: {
     code: "SAR",
     symbol: "ر.س",
-    symbolPosition: "end", // start or end
+    symbolPosition: "end",
   },
 
-  // Feature Flags
   features: {
     barcodeScanner: true,
     smartOptimizer: true,
@@ -62,9 +51,10 @@ export const appConfig = {
     wishlist: true,
     couponCopy: true,
     geolocation: true,
+    textImport: true,
+    compareModal: true,
   },
 
-  // Demo/Sample Data Mode
   demo: {
     enabled: true,
     message: "تم تحديث الأسعار بناءً على بيانات المتاجر المتاحة اليوم",

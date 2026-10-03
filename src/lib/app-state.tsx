@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { BasketLine } from "./optimizer";
+import { appConfig } from "@/config/app.config";
 
 export type Consent = { analytics: boolean; marketing: boolean; decided: boolean };
 type Loc = { label: string; lat?: number; lng?: number };
@@ -19,6 +20,8 @@ type Ctx = {
   setConsentOpen: (v: boolean) => void;
   location: Loc;
   setLocation: (l: Loc) => void;
+  detectLocation: () => void;
+  locating: boolean;
   recent: string[];
   pushRecent: (q: string) => void;
   dark: boolean;
@@ -36,32 +39,49 @@ function read<T>(key: string, fallback: T): T {
   }
 }
 
+async function reverseGeocode(lat: number, lng: number): Promise<string> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&accept-language=ar`,
+      { headers: { "Accept-Language": "ar" } },
+    );
+    if (!res.ok) throw new Error("geocode failed");
+    const data = await res.json();
+    const addr = data.address ?? {};
+    const district = addr.suburb || addr.neighbourhood || addr.city_district || addr.town || "";
+    const city = addr.city || addr.state || addr.county || "";
+    const parts = [city, district].filter(Boolean);
+    if (parts.length) return parts.join(" - ");
+    return data.display_name?.split(",").slice(0, 2).join(" - ") || `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+  } catch {
+    return `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+  }
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [basket, setBasket] = useState<BasketLine[]>([]);
   const [consent, setConsentState] = useState<Consent>({ analytics: false, marketing: false, decided: true });
   const [consentOpen, setConsentOpen] = useState(false);
-  const [location, setLocationState] = useState<Loc>({ label: "الرياض - حي العليا" });
+  const [location, setLocationState] = useState<Loc>({ label: appConfig.geo.defaultLocation.nameAr });
+  const [locating, setLocating] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
   const [dark, setDark] = useState(false);
   const userRef = useRef<User | null>(null);
 
-  // hydrate guest state
   useEffect(() => {
     setBasket(read("guest_basket", []));
     const c = read<Consent | null>("cookie_consent", null);
     if (c) setConsentState(c);
     else setConsentState({ analytics: false, marketing: false, decided: false });
-    setLocationState(read("delivery_location", { label: "الرياض - حي العليا" }));
+    setLocationState(read("delivery_location", { label: appConfig.geo.defaultLocation.nameAr }));
     setRecent(read("recent_searches", []));
     setDark(read("dark", false));
   }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
-    document.documentElement.dir = "rtl";
-    document.documentElement.lang = "ar";
   }, [dark]);
 
   const loadRemote = useCallback(async (u: User) => {
@@ -137,6 +157,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLocationState(l);
     localStorage.setItem("delivery_location", JSON.stringify(l));
   };
+  const detectLocation = () => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (p) => {
+        const lat = p.coords.latitude;
+        const lng = p.coords.longitude;
+        const label = await reverseGeocode(lat, lng);
+        setLocation({ label, lat, lng });
+        setLocating(false);
+      },
+      () => {
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
   const pushRecent = (q: string) => {
     if (!consent.marketing && !consent.analytics && !q) return;
     setRecent((r) => {
@@ -156,7 +193,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppCtx.Provider
       value={{
         user, authReady, basket, setQty, addItem, clearBasket, consent, setConsent,
-        consentOpen, setConsentOpen, location, setLocation, recent, pushRecent, dark, toggleDark,
+        consentOpen, setConsentOpen, location, setLocation, detectLocation, locating,
+        recent, pushRecent, dark, toggleDark,
       }}
     >
       {children}
