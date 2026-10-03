@@ -23,12 +23,12 @@ export function CookieBanner() {
       <div className="flex items-start gap-3">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground"><Cookie className="h-5 w-5" /></span>
         <div>
-          <p className="font-display font-bold">{t("cookieTitle")}</p>
+          <p className="font-display font-bold text-card-foreground">{t("cookieTitle")}</p>
           <p className="mt-1 text-sm text-muted-foreground">{t("cookieBody")}</p>
         </div>
       </div>
       {custom && (
-        <div className="mt-4 space-y-3 rounded-2xl bg-muted p-4 text-sm">
+        <div className="mt-4 space-y-3 rounded-2xl bg-muted p-4 text-sm text-card-foreground">
           <label className="flex items-center justify-between">{t("essential")}<Switch checked disabled /></label>
           <label className="flex items-center justify-between">{t("analytics")}<Switch checked={a} onCheckedChange={setA} /></label>
           <label className="flex items-center justify-between">{t("marketing")}<Switch checked={m} onCheckedChange={setM} /></label>
