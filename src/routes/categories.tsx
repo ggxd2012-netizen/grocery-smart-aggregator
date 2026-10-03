@@ -6,6 +6,7 @@ import { z } from "zod";
 import { CAT_EMOJI, CATEGORIES, TAGS, catalogQuery } from "@/lib/data";
 import { useI18n } from "@/lib/i18n";
 import { ProductCard } from "@/components/shop/bits";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const search = z.object({ c: z.string().optional(), tag: z.string().optional() });
@@ -31,11 +32,35 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
   );
 }
 
+function EmptyState({ category, filter }: { category?: string; filter?: string }) {
+  const { t } = useI18n();
+  const navigate = useNavigate({ from: "/categories" });
+
+  return (
+    <div className="grid place-items-center py-20 text-center">
+      <span className="text-7xl">🔍</span>
+      <h2 className="mt-4 font-display text-xl font-bold">{t("noResults")}</h2>
+      <p className="mt-2 max-w-xs text-sm text-muted-foreground">
+        {category && filter
+          ? `No products found in ${category} with the "${filter}" filter.`
+          : category
+            ? `No products found in this category.`
+            : filter
+              ? `No products match this filter.`
+              : "No products available."}
+      </p>
+      <Button onClick={() => navigate({ search: { c: undefined, tag: undefined } })} className="mt-6">
+        {t("categories")}
+      </Button>
+    </div>
+  );
+}
+
 function Categories() {
   const { t } = useI18n();
   const { c, tag } = Route.useSearch();
   const navigate = useNavigate({ from: "/categories" });
-  const { data: cat } = useQuery(catalogQuery);
+  const { data: cat, isLoading } = useQuery(catalogQuery);
   const [layout, setLayout] = useState<"grid" | "list">("grid");
 
   const items = (cat?.products ?? []).filter((p) => (!c || p.category === c) && (!tag || p.tags.includes(tag)));
@@ -63,13 +88,30 @@ function Categories() {
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{items.length} {t("items")}</p>
         <div className="flex rounded-full border p-0.5">
-          <button aria-label={t("grid")} onClick={() => setLayout("grid")} className={cn("rounded-full p-1.5", layout === "grid" && "bg-secondary")}><LayoutGrid className="h-4 w-4" /></button>
-          <button aria-label={t("list")} onClick={() => setLayout("list")} className={cn("rounded-full p-1.5", layout === "list" && "bg-secondary")}><List className="h-4 w-4" /></button>
+          <button aria-label={t("grid")} onClick={() => setLayout("grid")} className={cn("rounded-full p-1.5", layout === "grid" && "bg-secondary")}>
+            <LayoutGrid className="h-4 w-4" />
+          </button>
+          <button aria-label={t("list")} onClick={() => setLayout("list")} className={cn("rounded-full p-1.5", layout === "list" && "bg-secondary")}>
+            <List className="h-4 w-4" />
+          </button>
         </div>
       </div>
-      <div className={layout === "grid" ? "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" : "grid gap-2"}>
-        {items.map((p) => <ProductCard key={p.id} product={p} layout={layout} />)}
-      </div>
+
+      {isLoading ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="aspect-[3/4] rounded-2xl bg-muted animate-pulse" />
+          ))}
+        </div>
+      ) : items.length === 0 ? (
+        <EmptyState category={c} filter={tag} />
+      ) : (
+        <div className={layout === "grid" ? "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" : "grid gap-2"}>
+          {items.map((p) => (
+            <ProductCard key={p.id} product={p} layout={layout} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
