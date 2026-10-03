@@ -18,7 +18,8 @@ export type Catalog = {
 const hasSupabaseConfig = () => {
   const url = typeof import.meta !== "undefined" ? import.meta.env?.VITE_SUPABASE_URL : undefined;
   const key = typeof import.meta !== "undefined" ? import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY : undefined;
-  return Boolean((url && key) || (typeof process !== "undefined" && process.env?.SUPABASE_URL && process.env?.SUPABASE_PUBLISHABLE_KEY));
+  // Only the VITE_* project carries the catalog schema; server-only SUPABASE_URL can point at a different project.
+  return Boolean(url && key);
 };
 
 async function fetchCatalogFromSupabase(): Promise<Catalog> {
@@ -86,15 +87,9 @@ export const historyQuery = (productId: string) =>
   });
 
 export const CATEGORIES = ["dairy", "produce", "meat", "pantry", "beverages", "bakery", "household"] as const;
-export const CAT_EMOJI: Record<string, string> = {
-  dairy: "🥛",
-  produce: "🥬",
-  meat: "🥩",
-  pantry: "🫙",
-  beverages: "🧃",
-  bakery: "🥐",
-  household: "🧽",
-};
+export const CAT_IMAGE: Record<string, string> = Object.fromEntries(
+  CATEGORIES.map((c) => [c, `/categories/${c}.png`]),
+);
 export const TAGS = ["organic", "gluten_free", "keto", "lactose_free", "halal", "sugar_free"] as const;
 
 export const effective = (p: Price) => Number(p.promo_price ?? p.price);

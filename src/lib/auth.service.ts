@@ -21,15 +21,22 @@ export async function signUpWithEmail(email: string, password: string) {
       throw error;
     }
 
-    if (appConfig.email.autoConfirmEmails) {
-      toast.success("تم إنشاء حسابك بنجاح! يمكنك الآن تسجيل الدخول.", {
-        description: "لا تحتاج لتأكيد البريد — سجّل الدخول مباشرة",
-      });
+    // A session is returned only when the Supabase project has "Confirm email" disabled (auto-confirm).
+    if (data.session) {
+      toast.success("تم إنشاء حسابك وتسجيل دخولك بنجاح!");
       return data;
     }
 
+    if (appConfig.email.autoConfirmEmails) {
+      const signedIn = await supabase.auth.signInWithPassword({ email, password });
+      if (!signedIn.error && signedIn.data.session) {
+        toast.success("تم إنشاء حسابك وتسجيل دخولك بنجاح!");
+        return signedIn.data;
+      }
+    }
+
     toast.info("تحقق من بريدك الإلكتروني", {
-      description: "تم إرسال رابط التأكيد إليك. تحقق من البريد الرئيسي والسخام.",
+      description: "أرسلنا رابط التأكيد. تحقق من صندوق الوارد والرسائل غير المرغوبة، أو اضغط إعادة الإرسال.",
     });
 
     return data;
@@ -38,6 +45,19 @@ export async function signUpWithEmail(email: string, password: string) {
     console.error("Sign up error:", message);
     throw error;
   }
+}
+
+export async function resendConfirmation(email: string) {
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: { emailRedirectTo: window.location.origin },
+  });
+  if (error) {
+    toast.error(error.message);
+    throw error;
+  }
+  toast.success("تمت إعادة إرسال رسالة التأكيد");
 }
 
 export async function signInWithEmail(email: string, password: string) {

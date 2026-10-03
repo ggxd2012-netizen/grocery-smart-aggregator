@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { catalogQuery, effective, fmt, historyQuery, pricesFor } from "@/lib/data";
 import { useI18n } from "@/lib/i18n";
 import { useApp } from "@/lib/app-state";
-import { StockBadge, StoreBadge } from "@/components/shop/bits";
+import { ProductThumb, StockBadge, StoreBadge } from "@/components/shop/bits";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -97,7 +97,7 @@ function ProductPage() {
   return (
     <div className="space-y-6 pb-6">
       <section className="flex flex-col gap-4 rounded-3xl bg-card p-5 shadow-card ring-1 ring-border sm:flex-row sm:items-center">
-        <div className="grid h-32 w-32 shrink-0 place-items-center self-center rounded-3xl bg-muted text-7xl">{product.emoji}</div>
+        <div className="h-32 w-32 shrink-0 self-center overflow-hidden rounded-3xl bg-white ring-1 ring-border"><ProductThumb product={product} /></div>
         <div className="flex-1">
           <p className="text-xs text-muted-foreground">{product.brand} · {product.size}</p>
           <h1 className="mt-1 font-display text-2xl font-bold leading-tight">{name}</h1>

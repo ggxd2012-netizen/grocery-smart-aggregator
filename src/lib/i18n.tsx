@@ -75,6 +75,7 @@ const dict = {
   checkEmail: { en: "Check your email to confirm your account.", ar: "تحقق من بريدك لتأكيد حسابك." },
   haveAccount: { en: "Already have an account?", ar: "لديك حساب؟" },
   noAccount: { en: "New here?", ar: "جديد هنا؟" },
+  resendConfirm: { en: "Didn't get the email? Resend confirmation", ar: "لم تصلك الرسالة؟ أعد إرسال التأكيد" },
   guestNote: { en: "Your basket is saved on this device and moves to your account when you sign in.", ar: "سلتك محفوظة على هذا الجهاز وتنتقل إلى حسابك عند تسجيل الدخول." },
   addresses: { en: "Saved addresses", ar: "العناوين المحفوظة" },
   addAddress: { en: "Add address", ar: "أضف عنوانًا" },

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { LayoutGrid, List } from "lucide-react";
 import { z } from "zod";
-import { CAT_EMOJI, CATEGORIES, TAGS, catalogQuery } from "@/lib/data";
+import { CAT_IMAGE, CATEGORIES, TAGS, catalogQuery } from "@/lib/data";
 import { useI18n } from "@/lib/i18n";
 import { ProductCard } from "@/components/shop/bits";
 import { Button } from "@/components/ui/button";
@@ -71,7 +71,10 @@ function Categories() {
         <Chip active={!c} onClick={() => navigate({ search: (s) => ({ ...s, c: undefined }) })}>{t("all")}</Chip>
         {CATEGORIES.map((k) => (
           <Chip key={k} active={c === k} onClick={() => navigate({ search: (s) => ({ ...s, c: k }) })}>
-            {CAT_EMOJI[k]} {t(`cat_${k}` as never)}
+            <span className="inline-flex items-center gap-1.5">
+              <img src={CAT_IMAGE[k]} alt="" className="h-5 w-5 rounded-full bg-white object-cover" />
+              {t(`cat_${k}` as never)}
+            </span>
           </Chip>
         ))}
       </div>

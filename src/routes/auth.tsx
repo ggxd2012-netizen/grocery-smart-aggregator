@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { signInWithEmail, signUpWithEmail, signInWithGoogle } from "@/lib/auth.service";
+import { signInWithEmail, signUpWithEmail, signInWithGoogle, resendConfirmation } from "@/lib/auth.service";
 import { useI18n } from "@/lib/i18n";
 import { useApp } from "@/lib/app-state";
 import { Button } from "@/components/ui/button";
@@ -71,6 +71,15 @@ function AuthPage() {
         <div className="space-y-1.5"><Label htmlFor="pw">{t("password")}</Label><Input id="pw" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••" /></div>
         <Button type="submit" className="w-full" size="lg" disabled={busy}>{mode === "in" ? t("signIn") : t("signUp")}</Button>
       </form>
+      {mode === "up" && email && (
+        <button
+          type="button"
+          className="block w-full text-center text-sm font-medium text-primary underline-offset-4 hover:underline"
+          onClick={() => resendConfirmation(email).catch(() => {})}
+        >
+          {t("resendConfirm")}
+        </button>
+      )}
       <p className="text-center text-sm text-muted-foreground">
         {mode === "in" ? t("noAccount") : t("haveAccount")}{" "}
         <button className="font-semibold text-primary" onClick={() => setMode(mode === "in" ? "up" : "in")}>{mode === "in" ? t("signUp") : t("signIn")}</button>

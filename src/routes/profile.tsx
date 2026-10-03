@@ -83,7 +83,7 @@ function Profile() {
 
   const pname = (id: string) => {
     const p = cat?.products.find((x) => x.id === id);
-    return p ? `${p.emoji} ${lang === "ar" ? p.name_ar : p.name_en}` : id;
+    return p ? (lang === "ar" ? p.name_ar : p.name_en) : id;
   };
 
   return (

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { BadgePercent } from "lucide-react";
-import { CAT_EMOJI, CATEGORIES, catalogQuery, effective, fmt, pricesFor } from "@/lib/data";
+import { CAT_IMAGE, CATEGORIES, catalogQuery, effective, fmt, pricesFor } from "@/lib/data";
 import { useI18n } from "@/lib/i18n";
 import { ProductCard, SectionTitle } from "@/components/shop/bits";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -42,7 +42,12 @@ function Home() {
             <span key={s.id} className="rounded-full bg-primary-foreground/15 px-3 py-1 text-xs font-medium">{s.name}</span>
           ))}
         </div>
-        <span aria-hidden className="pointer-events-none absolute -bottom-6 end-4 text-[7rem] opacity-90 md:text-[10rem]">🧺</span>
+        <img
+          src="/hero-basket.png"
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute -bottom-4 end-2 hidden h-40 w-40 rounded-3xl object-cover opacity-95 shadow-lg sm:block md:h-56 md:w-56"
+        />
       </section>
 
       <section>
@@ -50,7 +55,7 @@ function Home() {
         <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
           {CATEGORIES.map((c) => (
             <Link key={c} to="/categories" search={{ c }} className="flex w-20 shrink-0 flex-col items-center gap-1.5 text-center">
-              <span className="grid h-16 w-16 place-items-center rounded-2xl bg-secondary text-3xl">{CAT_EMOJI[c]}</span>
+              <img src={CAT_IMAGE[c]} alt="" className="h-16 w-16 rounded-2xl bg-white object-cover ring-1 ring-border" loading="lazy" />
               <span className="text-xs font-medium leading-tight">{t(`cat_${c}` as never)}</span>
             </Link>
           ))}
@@ -79,15 +84,8 @@ function Home() {
         <SectionTitle>{t("topDeals")}</SectionTitle>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {isLoading && Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />)}
-          {gaps.map(({ p, gap }) => (
-            <div key={p.id} className="relative">
-              <ProductCard product={p} />
-              {gap > 0 && (
-                <span className="absolute start-3 top-3 rounded-full bg-accent px-2 py-0.5 text-[11px] font-bold text-accent-foreground tabular">
-                  ↕ {fmt(gap)}
-                </span>
-              )}
-            </div>
+          {gaps.map(({ p }) => (
+            <ProductCard key={p.id} product={p} />
           ))}
         </div>
         <p className="mt-4 text-center text-xs text-muted-foreground">{t("sample")}</p>

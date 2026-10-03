@@ -7,6 +7,7 @@ import { catalogQuery } from "@/lib/data";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ProductThumb } from "@/components/shop/bits";
 
 export const Route = createFileRoute("/scan")({
   head: () => ({
@@ -91,7 +92,9 @@ function Scan() {
         <div className="grid gap-2">
           {cat?.products.filter((p) => !p.barcode?.startsWith("2000")).slice(0, 4).map((p) => (
             <button key={p.id} onClick={() => lookup(p.barcode!)} className="flex items-center gap-3 rounded-xl bg-card px-3 py-2 text-start text-sm ring-1 ring-border hover:bg-muted">
-              <span className="text-xl">{p.emoji}</span>
+              <span className="h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-white ring-1 ring-border">
+                <ProductThumb product={p} />
+              </span>
               <span className="flex-1 truncate">{lang === "ar" ? p.name_ar : p.name_en}</span>
               <span className="font-mono text-xs text-muted-foreground">{p.barcode}</span>
             </button>
