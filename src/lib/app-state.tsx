@@ -42,7 +42,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [basket, setBasket] = useState<BasketLine[]>([]);
   const [consent, setConsentState] = useState<Consent>({ analytics: false, marketing: false, decided: true });
   const [consentOpen, setConsentOpen] = useState(false);
-  const [location, setLocationState] = useState<Loc>({ label: "Riyadh · Al Olaya" });
+  const [location, setLocationState] = useState<Loc>({ label: "الرياض - حي العليا" });
   const [recent, setRecent] = useState<string[]>([]);
   const [dark, setDark] = useState(false);
   const userRef = useRef<User | null>(null);
@@ -53,13 +53,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const c = read<Consent | null>("cookie_consent", null);
     if (c) setConsentState(c);
     else setConsentState({ analytics: false, marketing: false, decided: false });
-    setLocationState(read("delivery_location", { label: "Riyadh · Al Olaya" }));
+    setLocationState(read("delivery_location", { label: "الرياض - حي العليا" }));
     setRecent(read("recent_searches", []));
     setDark(read("dark", false));
   }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
+    document.documentElement.dir = "rtl";
+    document.documentElement.lang = "ar";
   }, [dark]);
 
   const loadRemote = useCallback(async (u: User) => {
